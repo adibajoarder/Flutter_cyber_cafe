@@ -1,0 +1,393 @@
+
+================================================================================
+           CYBER CAFÉ - MOBILE APPLICATION PROJECT SHOWCASE DOCUMENT
+================================================================================
+
+Project Name     : Cyber Café - Drink Ordering App
+Platform         : Flutter (Cross-Platform: Android, iOS, Windows, Web)
+Language         : Dart
+Version          : 1.0.0
+Architecture     : Provider Pattern (MVC-inspired Clean Architecture)
+Theme            : Dark Mode with Premium Glassmorphism UI
+
+================================================================================
+                            PROJECT OVERVIEW
+================================================================================
+
+Cyber Café is a fully functional mobile drink ordering application built with
+Flutter. It allows users to browse a curated menu of drinks, manage a shopping
+cart, enter delivery details, and simulate payment — all without any backend
+server or Firebase dependency. The entire app runs offline using local
+(on-device) data storage.
+
+The app was designed with a premium dark-mode aesthetic using a purple-to-pink
+gradient color palette, smooth animations, and a modern UI that feels like a
+real-world commercial product.
+
+================================================================================
+                         PROBLEM BEING SOLVED
+================================================================================
+
+This app solves the need for a lightweight, self-contained café ordering system
+that:
+  - Does NOT require an internet connection or cloud backend
+  - Supports full user registration and login (stored locally on-device)
+  - Provides a smooth, intuitive ordering experience from browsing to checkout
+  - Can be demonstrated and tested instantly without any server setup
+
+================================================================================
+                           FEATURES OF THE APP
+================================================================================
+
+1. SPLASH SCREEN
+   - Animated logo with gradient glow effect
+   - Auto-navigates to Login screen after 2 seconds
+   - Checks if user is already logged in (auto-login with saved session)
+
+2. LOGIN & REGISTRATION SCREEN
+   - Tabbed interface: "Login" tab and "Register" tab
+   - Login: Email + Password authentication
+   - Register: Full Name, Email, Phone Number, Password fields
+   - Real-time form validation (empty fields, email format, password length)
+   - Animated gradient button with loading spinner
+   - Error messages displayed inline with red alert box
+   - Password show/hide toggle
+   - Session persistence — once logged in, user stays logged in on next open
+
+3. HOME SCREEN (MENU)
+   - Displays ALL available drinks in a scrollable grid layout
+   - Category filter bar: All, Coffee, Cold Drinks, Tea, Smoothies, Juices
+   - Search bar to filter drinks by name
+   - "Popular" badge on trending drinks
+   - Each drink card shows: image, name, price, category
+   - Add to Cart button on each drink card
+   - Cart icon in top-right with live item count badge
+   - Greeting header showing logged-in user's name
+
+4. DRINK CARD WIDGET
+   - Custom-built reusable card with rounded corners
+   - Network image loading from Unsplash
+   - Gradient overlay on images
+   - Smooth "Add to Cart" interaction
+   - Visual feedback when item is already in cart
+
+5. CART SCREEN
+   - Lists all selected drinks with images, names, prices
+   - Increment (+) and Decrement (-) quantity controls per item
+   - Remove item button (swipe or tap delete icon)
+   - Live subtotal calculation
+   - Delivery charge auto-calculated (flat rate, scales up for large orders)
+   - Total amount shown at bottom
+   - "Proceed to Checkout" button
+
+6. CHECKOUT SCREEN
+   - Delivery address input field
+   - Payment method selection:
+       * Credit / Debit Card (with card number field)
+       * UPI / Mobile Pay (with UPI ID field)
+       * Cash on Delivery
+   - Order summary (drink list, subtotal, delivery, total)
+   - "Place Order" button triggers payment simulation
+   - Loading indicator during payment processing (2-second simulation)
+
+7. ORDER CONFIRMATION SCREEN
+   - Success animation (checkmark icon with gradient glow)
+   - Unique Order ID generated using UUID
+   - Order timestamp with formatted date/time
+   - Summary of ordered items, delivery address, payment method
+   - Total amount paid
+   - "Back to Home" button to start a new order
+   - Cart is cleared automatically after order placement
+
+================================================================================
+                         TECHNOLOGY STACK & LIBRARIES
+================================================================================
+
+CORE FRAMEWORK
+--------------
+Name    : Flutter
+Version : SDK >=3.0.0 <4.0.0
+Purpose : Cross-platform mobile & desktop UI framework by Google.
+          Used to build the entire app UI and logic in a single codebase
+          that runs on Android, iOS, Windows, Web, Linux and macOS.
+
+Language: Dart
+Purpose : Object-oriented, strongly typed language used for all app logic.
+
+--------------------------------------------------------------------------------
+
+LIBRARIES USED (pubspec.yaml dependencies)
+------------------------------------------
+
+1. provider: ^6.1.2
+   Purpose : State management library.
+   Usage   : Used to share and manage app state (cart items, auth status)
+             across all screens without passing data manually through
+             constructors. Two providers are registered:
+               - AuthProvider  : Manages user login/logout/register state
+               - CartProvider  : Manages cart items, quantities, totals
+
+2. shared_preferences: ^2.2.3
+   Purpose : Persistent local key-value storage (like a mini database).
+   Usage   : Stores registered user accounts as JSON on the device.
+             Also stores the currently logged-in user's ID so the app
+             remembers the session even after the app is closed and reopened.
+             No cloud or server required — everything stays on the device.
+
+3. google_fonts: ^6.2.1
+   Purpose : Access to 1,000+ Google Fonts directly inside Flutter.
+   Usage   : Applied "Poppins" font throughout the entire app for a clean,
+             modern typography look. Used for all text — headings, labels,
+             buttons, error messages, etc.
+
+4. uuid: ^4.4.0
+   Purpose : Generates universally unique identifiers (UUID).
+   Usage   : Used in the Order Confirmation screen to generate a unique
+             Order ID for each placed order (e.g., "ORD-3f8a1b2c").
+             Also used to assign unique IDs to registered users.
+
+5. intl: ^0.19.0
+   Purpose : Internationalization and date/number formatting.
+   Usage   : Used to format order timestamps in a readable format,
+             e.g., "April 17, 2026 at 11:45 AM".
+
+DEV DEPENDENCIES
+----------------
+
+6. flutter_lints: ^3.0.0
+   Purpose : Dart/Flutter lint rules for enforcing code quality and
+             best practices during development.
+
+7. flutter_test (SDK)
+   Purpose : Flutter's built-in testing framework for widget and unit tests.
+
+--------------------------------------------------------------------------------
+
+BUILT-IN FLUTTER / DART LIBRARIES USED
+---------------------------------------
+
+- dart:async     : Used in PaymentService for Future.delayed() to simulate
+                   payment processing network delay.
+- dart:convert   : Used in AuthService for jsonEncode/jsonDecode to serialize
+                   user data to/from JSON strings when saving to SharedPrefs.
+- material.dart  : Flutter's Material Design widget library — used for all UI
+                   components (Scaffold, AppBar, TabBar, TextField, etc.)
+- cupertino_icons: ^1.0.8 — iOS-style icon set included in the project.
+
+================================================================================
+                           PROJECT ARCHITECTURE
+================================================================================
+
+The project follows a clean, layered architecture:
+
+  lib/
+  ├── main.dart                   Entry point, app theme, provider setup
+  │
+  ├── models/                     DATA LAYER — plain Dart data classes
+  │   ├── drink.dart              Drink model (id, name, price, image, category)
+  │   ├── cart_item.dart          CartItem model (drink + quantity)
+  │   ├── order_model.dart        Order model (items, address, payment, total)
+  │   └── user_model.dart         UserModel (id, name, email, password, phone)
+  │
+  ├── services/                   SERVICE LAYER — business logic, data access
+  │   ├── auth_service.dart       Handles register/login/logout via SharedPrefs
+  │   ├── api_service.dart        Mock data service providing 12 drink items
+  │   └── payment_service.dart    Simulates payment processing (future gateway)
+  │
+  ├── providers/                  STATE MANAGEMENT LAYER
+  │   ├── auth_provider.dart      ChangeNotifier wrapping AuthService
+  │   └── cart_provider.dart      ChangeNotifier managing cart state & totals
+  │
+  ├── screens/                    UI LAYER — full screens
+  │   ├── splash_screen.dart      App launch, auto-login check, animation
+  │   ├── login_screen.dart       Login + Register tabbed screen
+  │   ├── home_screen.dart        Menu grid with category filter & search
+  │   ├── cart_screen.dart        Cart management screen
+  │   ├── checkout_screen.dart    Delivery + payment screen
+  │   └── order_confirmation_screen.dart  Success screen after order placed
+  │
+  ├── widgets/                    REUSABLE COMPONENTS
+  │   ├── drink_card.dart         Drink card widget for menu grid
+  │   ├── cart_item_widget.dart   Individual cart item row widget
+  │   └── custom_button.dart      Reusable gradient button widget
+  │
+  └── routes/
+      └── app_routes.dart         Named routes map for navigation
+
+================================================================================
+                              DESIGN SYSTEM
+================================================================================
+
+COLOR PALETTE
+  Background      : #0D0D1A  (Deep dark navy)
+  Surface         : #1A1A3E  (Dark purple surface)
+  Primary         : #6C63FF  (Vibrant purple)
+  Secondary/Accent: #FF6584  (Hot pink / rose)
+  Gradient        : #6C63FF → #FF6584 (Used on buttons, badges, logos)
+  Text Primary    : #FFFFFF
+  Text Secondary  : rgba(255,255,255,0.54)
+
+TYPOGRAPHY
+  Font Family     : Poppins (via google_fonts package)
+  Weights Used    : Regular (400), Medium (500), SemiBold (600), Bold (700)
+
+THEME MODE      : Dark (Brightness.dark throughout all screens)
+
+UI HIGHLIGHTS
+  - Glassmorphism cards with semi-transparent backgrounds
+  - LinearGradient on buttons, logos, category chips
+  - BoxShadow glows on interactive elements (purple glow on buttons)
+  - AnimatedContainer for button press feedback
+  - Rounded corners (BorderRadius 12–24) on all cards and inputs
+  - TabBar with animated gradient indicator for Login/Register switch
+
+================================================================================
+                         AUTHENTICATION FLOW
+================================================================================
+
+Since there is NO backend server, authentication is handled entirely on-device:
+
+  REGISTRATION:
+    1. User fills in Name, Email, Phone, Password
+    2. App checks SharedPreferences for existing users
+    3. If email is unique → new UserModel is created with a timestamp-based ID
+    4. User list is saved as JSON to SharedPreferences
+    5. Logged-in user ID is saved to SharedPreferences
+    6. User is navigated to the Home Screen
+
+  LOGIN:
+    1. User enters Email + Password
+    2. App loads all users from SharedPreferences
+    3. Searches for a matching email + password pair
+    4. If found → saves user ID to SharedPreferences (persistent session)
+    5. User is navigated to the Home Screen
+    6. If not found → error message is displayed
+
+  AUTO-LOGIN (Splash Screen):
+    1. App checks SharedPreferences for a saved user ID
+    2. If found → navigates directly to Home Screen (skip login)
+    3. If not found → navigates to Login Screen
+
+  LOGOUT:
+    - Removes the logged-in user ID from SharedPreferences
+    - Returns user to Login Screen
+
+================================================================================
+                           CART & PAYMENT FLOW
+================================================================================
+
+CART MANAGEMENT (CartProvider):
+  - addToCart(drink)        → Adds drink or increments quantity if exists
+  - removeFromCart(id)      → Removes drink from cart completely
+  - incrementQuantity(id)   → +1 quantity for specific drink
+  - decrementQuantity(id)   → -1 quantity (removes if reaches 0)
+  - clearCart()             → Empties entire cart after order
+  - subtotal                → Computed from all items x prices
+  - deliveryCharge          → $2.00 base, increases to $3.00 for orders >$20
+  - totalAmount             → subtotal + deliveryCharge
+
+PAYMENT (PaymentService):
+  - Simulates a real payment gateway with a 2-second network delay
+  - Supports methods: Credit/Debit Card, UPI/Mobile Pay, Cash on Delivery
+  - Currently returns true (success) — production would use Stripe/Razorpay
+  - After success → OrderModel created, cart cleared, confirmation shown
+
+================================================================================
+                             PRODUCT DATA
+================================================================================
+
+12 Drinks across 5 Categories (served from MockDataService):
+
+  COFFEE       : Iced Coffee ($4.00), Cappuccino ($4.50), Espresso ($2.00)
+  COLD DRINKS  : Classic Cola ($2.50), Strawberry Lemonade ($3.00)
+  TEA          : Green Tea Latte ($3.75), Chamomile Tea ($2.50)
+  SMOOTHIES    : Mango Smoothie ($3.50), Chocolate Milkshake ($4.25),
+                 Blueberry Smoothie ($3.75)
+  JUICES       : Watermelon Juice ($2.75), Orange Juice ($3.00)
+
+Popular Items: Classic Cola, Iced Coffee, Mango Smoothie, Strawberry Lemonade,
+               Chocolate Milkshake, Blueberry Smoothie
+
+Images loaded from: Unsplash (high-quality free stock photos via URL)
+
+================================================================================
+                        HOW TO RUN THE PROJECT
+================================================================================
+
+PREREQUISITES:
+  - Flutter SDK (>=3.0.0) installed
+  - Android Studio / VS Code with Flutter extension
+  - Android Emulator or physical device connected (or Windows desktop)
+
+STEPS:
+  1. Clone or open the project folder: d:\cyber_cafe_app\cyber_cafe_app\
+  2. Get dependencies:
+       flutter pub get
+  3. Run on Android device/emulator:
+       flutter run -d android
+  4. Run on Windows desktop:
+       flutter run -d windows
+  5. Build release APK:
+       flutter build apk --release
+
+OUTPUT APK PATH:
+  build\app\outputs\flutter-apk\app-release.apk
+
+================================================================================
+                         KEY TECHNICAL DECISIONS
+================================================================================
+
+1. NO FIREBASE / NO BACKEND
+   Reason: Self-contained app for showcase. SharedPreferences replaces a
+           database. All data lives on the device for instant demo.
+
+2. PROVIDER OVER BLOC/RIVERPOD
+   Reason: Provider is simpler for a mid-size app. It's officially recommended
+           by the Flutter team and reduces boilerplate significantly.
+
+3. MOCK DATA SERVICE
+   Reason: Replaces an API call with hard-coded data. In production, this
+           would be replaced with HTTP requests to a REST API (using http or
+           dio package).
+
+4. SIMULATED PAYMENT
+   Reason: No real payment gateway integration needed for a showcase. The
+           PaymentService.processPayment() method can be swapped with
+           Stripe SDK / Razorpay SDK in production with minimal changes.
+
+5. GOOGLE FONTS (POPPINS)
+   Reason: Gives a premium, modern look without needing to bundle font files.
+           google_fonts downloads and caches fonts dynamically.
+
+================================================================================
+                         FUTURE IMPROVEMENTS
+================================================================================
+
+  - Integrate real backend API (Firebase / Node.js / Django REST)
+  - Add real payment gateway (Stripe, Razorpay, or bKash for Bangladesh)
+  - Add order history screen with past orders stored in SharedPreferences
+  - Push notifications for order status updates (via FCM)
+  - Add user profile screen with editable name, phone, address
+  - Loyalty points / rewards system
+  - Dark/Light theme toggle
+  - Multi-language support using Flutter's intl/arb localization
+
+================================================================================
+                              DEVELOPER NOTES
+================================================================================
+
+  This project was built as a complete, functional, self-contained Flutter
+  application demonstrating:
+
+    ✓ Clean architecture with separation of concerns
+    ✓ State management using Provider pattern
+    ✓ Local data persistence via SharedPreferences
+    ✓ Form validation and error handling
+    ✓ Reusable widget components
+    ✓ Premium dark-mode UI with gradients and animations
+    ✓ Full user flow: Splash → Login/Register → Browse → Cart → Checkout → Confirm
+    ✓ No external backend dependency (zero server cost to demo)
+
+================================================================================
+                          END OF DOCUMENT
+================================================================================
